@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Custom Fetch Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Custom Fetch Demo</h1>
+    <form id="fetchForm">
+      <input
+        type="text"
+        id="urlInput"
+        placeholder="Enter API URL"
+        required
+        autofocus
+      />
+      <select id="methodSelect" aria-label="HTTP Method">
+        <option value="GET" selected>GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+      <textarea
+        id="bodyInput"
+        placeholder="Request body (for POST/PUT)"
+        rows="4"
+      ></textarea>
+      <button type="submit">Fetch</button>
+    </form>
+
+    <section class="output">
+      <h2>Response</h2>
+      <pre id="responseOutput">{}</pre>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
