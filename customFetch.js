@@ -1,11 +1,13 @@
-class customFetch {
-  constructor(url, headers = {}) {
-    this.baseUrl = url;
+export class customFetch {
+  constructor({ baseUrl = "", headers = {} }) {
+    this.baseUrl = baseUrl;
     this.headers = headers;
   }
 
+  //custom fetch wrapper
   async fetchWrapper(url, options = {}) {
-    const response = fetch(this.baseUrl + url, options);
+    const finalUrl = this.createFinalUrl(url);
+    const response = await fetch(finalUrl, options);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -22,28 +24,33 @@ class customFetch {
   }
 
   //post method for custom fetch
-  post(url, body){
+  post(url, body) {
     return this.fetchWrapper(url, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(body),
-    })
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(body),
+    });
   }
 
   //put method for custom fetch
   put(url, body) {
     return this.fetchWrapper(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: this.headers,
       body: JSON.stringify(body),
     });
   }
 
-  //delete method foro custom fetch
-  delete(url){
+  //delete method for custom fetch
+  delete(url) {
     return this.fetchWrapper(url, {
-        method: "DELETE",
-    })
+      method: "DELETE",
+    });
+  }
+  //method for creating final url
+  createFinalUrl(url) {
+    const cleanBase = this.baseUrl.replace(/\/+$/, '');
+    const cleanUrl = url.replace(/^\/+/, '');
+    return `${cleanBase}/${cleanUrl}`;
   }
 }
-
