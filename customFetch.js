@@ -1,19 +1,42 @@
 export class customFetch {
-  constructor({ baseUrl = "", headers = {} }) {
+  constructor({ baseUrl = "", headers = {}, timeout = 0 }) {
     this.baseUrl = baseUrl;
     this.headers = headers;
+    this.timeout = timeout;
   }
 
   //custom fetch wrapper
   async fetchWrapper(url, options = {}) {
-    const finalUrl = this.createFinalUrl(url);
-    const response = await fetch(finalUrl, options);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const controller = new AbortController();
+    let timeoutId;
+    if (this.timeout > 0) {
+      timeoutId = setTimeout(() => {
+        controller.abort();
+      }, this.timeout);
     }
 
-    return response.json();
+    const finalUrl = this.createFinalUrl(url);
+    try {
+      const response = await fetch(finalUrl, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      if (timeoutId) clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (e) {
+      if (timeoutId) clearTimeout(timeoutId);
+
+      if (e.name === "AbortError") {
+        throw new Error("Request timed out");
+      }
+      throw e;
+    }
   }
 
   //get method for custom fetch
@@ -49,8 +72,13 @@ export class customFetch {
   }
   //method for creating final url
   createFinalUrl(url) {
-    const cleanBase = this.baseUrl.replace(/\/+$/, '');
-    const cleanUrl = url.replace(/^\/+/, '');
-    return `${cleanBase}/${cleanUrl}`;
+    let cleanBase = "";
+    let cleanUrl = url.replace(/^\/+/, "");
+    if (this.baseUrl != "") {
+      cleanBase = this.baseUrl.replace(/\/+$/, "");
+      return `${cleanBase}/${cleanUrl}`;
+    } else {
+      return cleanUrl;
+    }
   }
 }
